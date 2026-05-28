@@ -1273,7 +1273,7 @@ python main.py
 
 
 
-"schema.md"   :
+"schema.sql"   :
 
 PRAGMA foreign_keys = ON;
 
