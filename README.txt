@@ -1213,6 +1213,110 @@ if __name__ == "__main__":
     app = App()
     app.mainloop()
 
+schema.sql
+
+PRAGMA foreign_keys = ON;
+
+CREATE TABLE IF NOT EXISTS Roles (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    name TEXT NOT NULL UNIQUE,
+    title TEXT NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS Users (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    role_id INTEGER NOT NULL,
+    login TEXT NOT NULL UNIQUE,
+    password TEXT NOT NULL,
+    full_name TEXT NOT NULL,
+    FOREIGN KEY (role_id) REFERENCES Roles(id)
+        ON UPDATE CASCADE
+        ON DELETE RESTRICT
+);
+
+CREATE TABLE IF NOT EXISTS Categories (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    name TEXT NOT NULL UNIQUE
+);
+
+CREATE TABLE IF NOT EXISTS Manufacturers (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    name TEXT NOT NULL UNIQUE
+);
+
+CREATE TABLE IF NOT EXISTS Suppliers (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    name TEXT NOT NULL UNIQUE
+);
+
+CREATE TABLE IF NOT EXISTS Products (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    article TEXT NOT NULL UNIQUE,
+    name TEXT NOT NULL,
+    category_id INTEGER NOT NULL,
+    description TEXT NOT NULL DEFAULT '',
+    manufacturer_id INTEGER NOT NULL,
+    supplier_id INTEGER NOT NULL,
+    price REAL NOT NULL CHECK(price >= 0),
+    unit TEXT NOT NULL DEFAULT 'шт.',
+    quantity INTEGER NOT NULL DEFAULT 0 CHECK(quantity >= 0),
+    discount INTEGER NOT NULL DEFAULT 0 CHECK(discount >= 0 AND discount <= 100),
+    image_path TEXT,
+    FOREIGN KEY (category_id) REFERENCES Categories(id)
+        ON UPDATE CASCADE
+        ON DELETE RESTRICT,
+    FOREIGN KEY (manufacturer_id) REFERENCES Manufacturers(id)
+        ON UPDATE CASCADE
+        ON DELETE RESTRICT,
+    FOREIGN KEY (supplier_id) REFERENCES Suppliers(id)
+        ON UPDATE CASCADE
+        ON DELETE RESTRICT
+);
+
+CREATE TABLE IF NOT EXISTS Orders (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    status TEXT NOT NULL,
+    pickup_point TEXT NOT NULL,
+    order_date TEXT NOT NULL,
+    issue_date TEXT NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS OrderProducts (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    order_id INTEGER NOT NULL,
+    product_id INTEGER NOT NULL,
+    quantity INTEGER NOT NULL DEFAULT 1 CHECK(quantity > 0),
+    FOREIGN KEY (order_id) REFERENCES Orders(id)
+        ON UPDATE CASCADE
+        ON DELETE CASCADE,
+    FOREIGN KEY (product_id) REFERENCES Products(id)
+        ON UPDATE CASCADE
+        ON DELETE RESTRICT
+);
+
+
+
+template...
+
+# Протокол тестирования
+
+| № | Проверка | Входные данные | Ожидаемый результат | Фактический результат | Статус |
+|---|---|---|---|---|---|
+| 1 | Вход администратора | admin / admin | Открывается список товаров, доступны добавление/редактирование/удаление |  |  |
+| 2 | Вход менеджера | manager / manager | Открывается список товаров, доступны поиск, фильтр, сортировка, заказы |  |  |
+| 3 | Вход клиента | client / client | Открывается список товаров без администрирования |  |  |
+| 4 | Вход гостя | Кнопка «Войти как гость» | Открывается список товаров без поиска, фильтра и редактирования |  |  |
+| 5 | Неверный пароль | admin / 123 | Появляется сообщение об ошибке авторизации |  |  |
+| 6 | Поиск товара | Ввести часть названия товара | Список обновляется в реальном времени |  |  |
+| 7 | Фильтр по поставщику | Выбрать поставщика | Показаны товары выбранного поставщика |  |  |
+| 8 | Сброс фильтра | Выбрать «Все поставщики» | Отображаются все товары |  |  |
+| 9 | Сортировка по количеству | Количество ↑ / ↓ | Товары сортируются по остатку |  |  |
+| 10 | Добавление товара | Заполнить форму корректными данными | Новый товар появляется в списке |  |  |
+| 11 | Отрицательная цена | Цена = -10 | Появляется сообщение об ошибке |  |  |
+| 12 | Удаление товара в заказе | Удалить товар из заказа | Удаление запрещено, показано сообщение |  |  |
+| 13 | Просмотр заказов менеджером | manager / manager → «Заказы» | Открывается список заказов без кнопки добавления |  |  |
+| 14 | Добавление заказа администратором | admin / admin → «Заказы» → «Добавить заказ» | Заказ сохраняется и появляется в списке |  |  |
+
 
 rREADME.md
 Руководство пользователя
